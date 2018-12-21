@@ -23,9 +23,9 @@ tema <-  theme_minimal() +
 
 ### Datos ----
 
-# Los datos los obtuve de las secciones ¿PARA QUÉ SE GASTA? y ¿QUIÉN GASTA? en esta liga: https://www.transparenciapresupuestaria.gob.mx/es/PTP/infografia_ppef2019#page3
+# Dado el tamaño de los datos, no están disponibles en el repositorio de GitHub pero se pueden descargar en https://www.transparenciapresupuestaria.gob.mx
 
-# PEFs 2011-2018. Fuente: https://www.transparenciapresupuestaria.gob.mx
+# PEFs 2011-2018. 
 pef_11 <- read_csv("01_datos/presupuesto_mexico__2011.csv", locale = locale("es", asciify = TRUE))
 pef_12 <- read_csv("01_datos/presupuesto_mexico__2012.csv", locale = locale("es", asciify = TRUE))
 pef_13 <- read_csv("01_datos/presupuesto_mexico__2013.csv", locale = locale("es", asciify = TRUE))
@@ -76,3 +76,48 @@ ppef_19_corto <-
 
 ### Unir datos de PEFs 2011-2018 y PPEF 2019 ----
 bd <- rbind(pef_11_18_corto, ppef_19_corto) 
+
+### Generar data frame que solo contenga los datos de los Centros Conacyt ----
+cc <- bd %>% 
+  filter(str_detect(desc_ramo, "Ciencia")) %>% 
+  mutate(acronimo = case_when(desc_ur == "Centro de Ingeniería y Desarrollo Industrial" ~ "CIDESI",
+                              desc_ur == "Centro de Investigación Científica de Yucatán, A.C." ~ "CICY",
+                              desc_ur == "Centro de Investigación Científica y de Educación Superior de Ensenada, B.C." | desc_ur ==  "Centro de Investigación Científica y de Educación Superior de Ensenada, Baja California" ~ "CICESE",
+                              desc_ur == "Centro de Investigación en Alimentación y Desarrollo, A.C." ~ "CIAD",
+                              desc_ur == "Centro de Investigación en Ciencias de Información Geoespacial, A.C." | str_detect(desc_ur, "Centro de Investigación en Geografía y Geomática") ~ "CentroGEO",
+                              desc_ur == "Centro de Investigación en Matemáticas, A.C." ~ "CIMAT",
+                              desc_ur == "Centro de Investigación en Materiales Avanzados, S.C." ~ "CIMAV",
+                              desc_ur == "Centro de Investigación en Química Aplicada" ~ "CIQA",
+                              desc_ur == "Centro de Investigación y Asistencia en Tecnología y Diseño del Estado de Jalisco, A.C." ~ "CIATEJ",
+                              desc_ur == "Centro de Investigación y Desarrollo Tecnológico en Electroquímica, S.C." ~ "CIDETEQ",
+                              desc_ur == "Centro de Investigación y Docencia Económicas, A.C." ~ "CIDE",
+                              desc_ur == "Centro de Investigaciones Biológicas del Noroeste, S.C." ~ "CIB",
+                              desc_ur == "Centro de Investigaciones en Optica, A.C." | desc_ur ==  "Centro de Investigaciones en Óptica, A.C." ~ "CIO",
+                              desc_ur == "Centro de Investigaciones y Estudios Superiores en Antropología Social" ~ "CIESAS",
+                              desc_ur == "CIATEC, A.C. \"Centro de Innovación Aplicada en Tecnologías Competitivas\"" ~ "CIATEC",
+                              desc_ur == "CIATEQ, A.C. Centro de Tecnología Avanzada" ~ "CIATEQ",
+                              desc_ur == "Consejo Nacional de Ciencia y Tecnología" ~ "Conacyt",
+                              desc_ur == "El Colegio de la Frontera Norte, A.C." ~ "COLEF",
+                              desc_ur == "El Colegio de la Frontera Sur" ~ "ECOSUR",
+                              desc_ur == "El Colegio de Michoacán, A.C." ~ "COLMICH",
+                              desc_ur == "El Colegio de San Luis, A.C." ~ "COLSAN",
+                              desc_ur == "Fondo para el Desarrollo de Recursos Humanos" ~ "FIDERH",
+                              desc_ur == "Instituto de Ecología, A.C." ~ "INECOL",
+                              desc_ur == "Instituto de Investigaciones \"Dr. José María Luis Mora\"" ~ "Instituto Mora",
+                              desc_ur == "Instituto Nacional de Astrofísica, Optica y Electrónica" | desc_ur == "Instituto Nacional de Astrofísica, Óptica y Electrónica" ~ "INAOE",
+                              desc_ur == "Instituto Potosino de Investigación Científica y Tecnológica, A.C." ~ "IPICYT",
+                              TRUE ~ desc_ur)) %>% 
+  filter(!acronimo %in% c("Conacyt", "FIDERH")) %>% 
+  group_by(ciclo, acronimo) %>% 
+  summarise(monto_anual = sum(monto, na.rm = T)) %>% 
+  ungroup() %>% 
+  mutate(deflactor = case_when(ciclo == 2011 ~ 71.8, # Deflactor tomado de datos calculados por Alberto Serdán. El archivo está en la carpeta 01_datos
+                               ciclo == 2012 ~ 74.8,
+                               ciclo == 2013 ~ 75.9,
+                               ciclo == 2014 ~ 79.3,
+                               ciclo == 2015 ~ 81.5,
+                               ciclo == 2016 ~ 85.8,
+                               ciclo == 2017 ~ 91.6,
+                               ciclo == 2018 ~  96.3,
+                               ciclo == 2019 ~ 100),
+         monto_anual_deflactado = (monto_anual/deflactor)*100) # Deflactar presupuestos
