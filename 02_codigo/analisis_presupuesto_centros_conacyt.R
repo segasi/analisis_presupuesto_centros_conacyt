@@ -243,7 +243,7 @@ cc %>%
   ggplot(aes(fct_rev(fct_reorder(acronimo, monto_anual_deflactado/1000000)), monto_anual_deflactado/1000000)) +
   geom_point(aes(color = factor(ciclo)), size = 4) +
   coord_flip() +
-  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 700, 50), limits = c(0, 705)) +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 700, 50), limits = c(0, 709)) +
   scale_color_manual(values = c("salmon", "steelblue")) +
   labs(title = str_wrap(str_to_upper("presupuesto de 24 centros conacyt en el primer año de los gobiernos de enrique Peña Nieto (2013) y andrés manuel López Obrador (2019)"), width = 70), 
        subtitle = "Millones de pesos constantes", 
