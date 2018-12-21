@@ -208,3 +208,26 @@ cc %>%
         legend.position = c(0.9, 0.9))
 
 ggsave(filename = "prespuesto_centros_conacyt_2011_2019_lineas_cide_resaltado.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
+
+
+### Gráfica: columnas de cambio % del presupuesto de Centros Conacyt, 2015 vs. 2019 ----
+cc %>% 
+  arrange(acronimo, ciclo) %>% 
+  group_by(acronimo) %>% 
+  mutate(lag_cuatro = lag(monto_anual_deflactado, n = 4)) %>% 
+  ungroup() %>% 
+  filter(ciclo == 2019) %>% 
+  mutate(cambio_15_19 = ((monto_anual_deflactado - lag_cuatro)/lag_cuatro)*100) %>% 
+  ggplot(aes(fct_rev(fct_reorder(acronimo, cambio_15_19)), cambio_15_19)) +
+  geom_col(fill = "salmon") +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(-45, 5, 5), limits = c(-45, 5)) +
+  labs(title = str_wrap(str_to_upper("cambio porcentual del presupuesto de 24 centros conacyt entre 2015 y 2019"), width = 75), 
+       x = "",
+       y = "\nCambio porcentual",
+       color = NULL,
+       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2015 corresponde al presupuesto aprobado; los de\n2019 al presupuesto proyectado. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
+  tema +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+ggsave(filename = "cambio_porcetual_prespuesto_centros_conacyt_2015_2019.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
+
