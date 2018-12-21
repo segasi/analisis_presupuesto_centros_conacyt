@@ -147,3 +147,24 @@ cc %>%
 
 
 ggsave(filename = "cambio_porcetual_prespuesto_centros_conacyt_2018_2019.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
+
+
+
+### Gráfica: evolución presupuesto Centros Conacyt, 2011-2019 ----
+cc %>% 
+  mutate(color_cide = ifelse(acronimo == "CIDE", "CIDE", "Otros centros")) %>% 
+  ggplot(aes(ciclo, monto_anual_deflactado/1000000, group = acronimo)) +
+  geom_line(size = 1, alpha = 0.6, color = "steelblue") +
+  scale_x_continuous(breaks = 2011:2019) +
+  scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
+  labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt"), width = 65), 
+       subtitle = "Millones de pesos constantes", 
+       x = "",
+       y = "Millones de pesos constantes\n",
+       color = NULL,
+       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2011 a 2018 corresponde a presupuestos aprobados; los de\n2019 a presupuestos proyectados. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
+  tema +
+  theme(legend.direction = "vertical",
+        legend.position = c(0.9, 0.9))
+
+ggsave(filename = "prespuesto_centros_conacyt_2011_2019_lineas.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
