@@ -121,3 +121,29 @@ cc <- bd %>%
                                ciclo == 2018 ~  96.3,
                                ciclo == 2019 ~ 100),
          monto_anual_deflactado = (monto_anual/deflactor)*100) # Deflactar presupuestos
+
+
+### Gráfica: cambio % del presupuesto de Centros Conacyt, 2018 vs. 2019 ----
+cc %>% 
+  arrange(acronimo, ciclo) %>% 
+  group_by(acronimo) %>% 
+  mutate(lag_uno = lag(monto_anual_deflactado)) %>% 
+  ungroup() %>% 
+  filter(ciclo == 2019) %>% 
+  mutate(cambio_18_19 = ((monto_anual_deflactado - lag_uno)/lag_uno)*100,
+         color_barras = ifelse(cambio_18_19 > 0, "positivo", "negativo")) %>% 
+  ggplot(aes(fct_rev(fct_reorder(acronimo, cambio_18_19)), cambio_18_19)) +
+  geom_col(aes(fill = color_barras)) +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(-20, 15, 5), limits = c(-20, 10)) +
+  scale_fill_manual(values = c("salmon", "steelblue")) +
+  labs(title = str_wrap(str_to_upper("cambio porcentual del presupuesto de 24 centros conacyt entre 2018 y 2019"), width = 75), 
+       x = "",
+       y = "\nCambio porcentual",
+       color = NULL,
+       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2018 corresponde al presupuesto aprobado; los de\n2019 al presupuesto proyectado. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
+  tema +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+        legend.position = "none")
+
+
+ggsave(filename = "cambio_porcetual_prespuesto_centros_conacyt_2018_2019.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
