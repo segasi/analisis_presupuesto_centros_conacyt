@@ -231,3 +231,30 @@ cc %>%
 
 ggsave(filename = "cambio_porcetual_prespuesto_centros_conacyt_2015_2019.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
 
+
+
+### Gráfica: cambio % del presupuesto de Centros Conacyt en el primer año de los gobiernos de Erique Peña Nieto (2013) y Andrés Manuel López Obrador (2019) ----
+cc %>% 
+  arrange(acronimo, ciclo) %>% 
+  group_by(acronimo) %>% 
+  mutate(lag_cuatro = lag(monto_anual_deflactado, n = 4)) %>% 
+  ungroup() %>% 
+  filter(ciclo == 2019 | ciclo == 2013) %>% 
+  ggplot(aes(fct_rev(fct_reorder(acronimo, monto_anual_deflactado/1000000)), monto_anual_deflactado/1000000)) +
+  geom_point(aes(color = factor(ciclo)), size = 4) +
+  coord_flip() +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 700, 50), limits = c(0, 700)) +
+  scale_color_manual(values = c("salmon", "steelblue")) +
+  labs(title = str_wrap(str_to_upper("presupuesto de 24 centros conacyt en el primer año de los gobiernos de enrique Peña Nieto (2013) y andrés manuel López Obrador (2019)"), width = 70), 
+       subtitle = "Millones de pesos constantes", 
+       x = "",
+       y = "\nMillones de pesos constantes",
+       color = NULL,
+       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2013 corresponde al presupuesto aprobado; los de\n2019 al presupuesto proyectado. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
+  tema +
+  theme(legend.position = c(0.89, 0.9),
+        legend.direction = "vertical",
+        legend.text = element_text(size = 13))
+
+
+ggsave(filename = "prespuesto_centros_conacyt_2013_vs_2019.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
