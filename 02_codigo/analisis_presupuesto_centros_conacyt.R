@@ -158,7 +158,7 @@ cc %>%
   scale_x_continuous(breaks = 2011:2019) +
   scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
   labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt"), width = 65), 
-       subtitle = "Millones de pesos constantes", 
+       subtitle = "Millones de pesos constantes, base 2019", 
        x = "",
        y = "Millones de pesos constantes\n",
        color = NULL,
@@ -178,7 +178,7 @@ cc %>%
   scale_x_continuous(breaks = 2011:2019) +
   scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
   labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt"), width = 65), 
-       subtitle = "Millones de pesos constantes", 
+       subtitle = "Millones de pesos constantes, base 2019", 
        x = "",
        y = "Millones de pesos constantes\n",
        color = NULL,
@@ -198,7 +198,7 @@ cc %>%
   scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
   scale_color_manual(values = c("salmon", "steelblue")) +
   labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt"), width = 65), 
-       subtitle = "Millones de pesos constantes", 
+       subtitle = "Millones de pesos constantes, base 2019", 
        x = "",
        y = "Millones de pesos constantes\n",
        color = NULL,
@@ -246,7 +246,7 @@ cc %>%
   scale_y_continuous(expand = c(0, 0), breaks = seq(0, 700, 50), limits = c(0, 709)) +
   scale_color_manual(values = c("salmon", "steelblue")) +
   labs(title = str_wrap(str_to_upper("presupuesto de 24 centros conacyt en el primer año de los gobiernos de enrique Peña Nieto (2013) y andrés manuel López Obrador (2019)"), width = 70), 
-       subtitle = "Millones de pesos constantes", 
+       subtitle = "Millones de pesos constantes, base 2019", 
        x = "",
        y = "\nMillones de pesos constantes",
        color = NULL,
