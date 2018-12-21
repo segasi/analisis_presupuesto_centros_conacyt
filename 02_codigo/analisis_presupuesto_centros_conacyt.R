@@ -233,7 +233,7 @@ ggsave(filename = "cambio_porcetual_prespuesto_centros_conacyt_2015_2019.png", p
 
 
 
-### Gráfica: cambio % del presupuesto de Centros Conacyt en el primer año de los gobiernos de Erique Peña Nieto (2013) y Andrés Manuel López Obrador (2019) ----
+### Gráfica: presupuesto de Centros Conacyt en el primer año de los gobiernos de Erique Peña Nieto (2013) y Andrés Manuel López Obrador (2019) ----
 cc %>% 
   arrange(acronimo, ciclo) %>% 
   group_by(acronimo) %>% 
