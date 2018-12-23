@@ -203,7 +203,7 @@ cc %>%
   mutate(color_cide = ifelse(acronimo == "CIDE", "CIDE", "Otros centros")) %>% 
   ggplot(aes(ciclo, monto_anual_deflactado/1000000, group = acronimo)) +
   geom_line(aes(color = color_cide), size = 1, alpha = 0.6) +
-  scale_x_continuous(breaks = 2011:2019) +
+  scale_x_continuous(breaks = 2008:2019) +
   scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
   scale_color_manual(values = c("salmon", "steelblue")) +
   labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt, 2008-2019"), width = 65), 
