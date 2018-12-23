@@ -23,9 +23,12 @@ tema <-  theme_minimal() +
 
 ### Datos ----
 
-# Dado el tamaño de los datos, no están disponibles en el repositorio de GitHub pero se pueden descargar en https://www.transparenciapresupuestaria.gob.mx
+# Dado el tamaño de los datos, no están disponibles en el repositorio de GitHub pero se pueden descargar en https://www.transparenciapresupuestaria.gob.mx/es/PTP/datos_presupuestarios_abiertos
 
 # PEFs 2011-2018. 
+pef_08 <- read_csv("01_datos/presupuesto_mexico__2008.csv", locale = locale("es", asciify = TRUE))
+pef_09 <- read_csv("01_datos/presupuesto_mexico__2009.csv", locale = locale("es", asciify = TRUE))
+pef_10 <- read_csv("01_datos/presupuesto_mexico__2010.csv", locale = locale("es", asciify = TRUE))
 pef_11 <- read_csv("01_datos/presupuesto_mexico__2011.csv", locale = locale("es", asciify = TRUE))
 pef_12 <- read_csv("01_datos/presupuesto_mexico__2012.csv", locale = locale("es", asciify = TRUE))
 pef_13 <- read_csv("01_datos/presupuesto_mexico__2013.csv", locale = locale("es", asciify = TRUE))
@@ -40,6 +43,9 @@ ppef_19 <- read_csv("01_datos/PPEF_2019.csv", locale = locale(encoding = "latin1
 
 
 ### "Limpiar" nombres de variables ----
+pef_08 <- pef_08 %>% clean_names()
+pef_09 <- pef_09 %>% clean_names()
+pef_10 <- pef_10 %>% clean_names()
 pef_11 <- pef_11 %>% clean_names()
 pef_12 <- pef_12 %>% clean_names()
 pef_13 <- pef_13 %>% clean_names()
@@ -51,12 +57,12 @@ pef_18 <- pef_18 %>% clean_names()
 ppef_19 <- ppef_19 %>% clean_names() 
 
 
-### Unir PEFs 2011-2018 ----
-pef_11_18 <- rbind(pef_11, pef_12, pef_13, pef_14, pef_15, pef_16, pef_17, pef_18)
+### Unir PEFs 2008-2018 ----
+pef_08_18 <- rbind(pef_08, pef_09, pef_10, pef_11, pef_12, pef_13, pef_14, pef_15, pef_16, pef_17, pef_18)
 
 
 ### Agregar columnas que faltan para unir las dos bases de datos ----
-pef_11_18_corto <- pef_11_18 %>%  
+pef_08_18_corto <- pef_08_18 %>%  
   select(ciclo, desc_ramo, desc_ur, desc_pp, contains("monto")) %>% 
   mutate(monto = monto_aprobado, 
          monto_proyecto = NA)
@@ -74,8 +80,8 @@ ppef_19_corto <-
          monto_pagado = NA)
 
 
-### Unir datos de PEFs 2011-2018 y PPEF 2019 ----
-bd <- rbind(pef_11_18_corto, ppef_19_corto) 
+### Unir datos de PEFs 2008-2018 y PPEF 2019 ----
+bd <- rbind(pef_08_18_corto, ppef_19_corto) 
 
 ### Generar data frame que solo contenga los datos de los Centros Conacyt ----
 cc <- bd %>% 
@@ -111,14 +117,17 @@ cc <- bd %>%
   group_by(ciclo, acronimo) %>% 
   summarise(monto_anual = sum(monto, na.rm = T)) %>% 
   ungroup() %>% 
-  mutate(deflactor = case_when(ciclo == 2011 ~ 71.8, # Deflactor tomado de datos calculados por Alberto Serdán. El archivo está en la carpeta 01_datos
+  mutate(deflactor = case_when(ciclo == 2008 ~ 62.5,
+                               ciclo == 2009 ~ 64.9,
+                               ciclo == 2010 ~ 67.9,
+                               ciclo == 2011 ~ 71.8, # Deflactor tomado de datos calculados por Alberto Serdán. El archivo está en la carpeta 01_datos
                                ciclo == 2012 ~ 74.8,
                                ciclo == 2013 ~ 75.9,
                                ciclo == 2014 ~ 79.3,
                                ciclo == 2015 ~ 81.5,
                                ciclo == 2016 ~ 85.8,
                                ciclo == 2017 ~ 91.6,
-                               ciclo == 2018 ~  96.3,
+                               ciclo == 2018 ~ 96.3,
                                ciclo == 2019 ~ 100),
          monto_anual_deflactado = (monto_anual/deflactor)*100) # Deflactar presupuestos
 
@@ -150,44 +159,44 @@ ggsave(filename = "cambio_porcetual_prespuesto_centros_conacyt_2018_2019.png", p
 
 
 
-### Gráfica: evolución presupuesto Centros Conacyt, 2011-2019 ----
+### Gráfica: evolución presupuesto Centros Conacyt, 2008-2019 ----
 cc %>% 
   mutate(color_cide = ifelse(acronimo == "CIDE", "CIDE", "Otros centros")) %>% 
   ggplot(aes(ciclo, monto_anual_deflactado/1000000, group = acronimo)) +
   geom_line(size = 1, alpha = 0.6, color = "steelblue") +
-  scale_x_continuous(breaks = 2011:2019) +
+  scale_x_continuous(breaks = 2008:2019) +
   scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
-  labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt"), width = 65), 
+  labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt, 2008-2019"), width = 65), 
        subtitle = "Millones de pesos constantes, año base = 2019", 
        x = "",
        y = "Millones de pesos constantes\n",
        color = NULL,
-       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2011 a 2018 corresponde a presupuestos aprobados; los de\n2019 a presupuestos proyectados. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
+       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2008 a 2018 corresponde a presupuestos aprobados; los de\n2019 a presupuestos proyectados. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
   tema +
   theme(legend.direction = "vertical",
         legend.position = c(0.9, 0.9))
 
-ggsave(filename = "prespuesto_centros_conacyt_2011_2019_lineas.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
+ggsave(filename = "prespuesto_centros_conacyt_2008_2019_lineas.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
 
 
-### Gráfica: boxlplot de evolución presupuesto Centros Conacyt, 2011-2019 ----
+### Gráfica: boxlplot de evolución presupuesto Centros Conacyt, 2008-2019 ----
 cc %>% 
   mutate(color_cide = ifelse(acronimo == "CIDE", "CIDE", "Otros centros")) %>% 
   ggplot(aes(ciclo, monto_anual_deflactado/1000000, group = ciclo)) +
   geom_boxplot(color = "steelblue", outlier.color = "salmon") +
-  scale_x_continuous(breaks = 2011:2019) +
+  scale_x_continuous(breaks = 2008:2019) +
   scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
-  labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt"), width = 65), 
+  labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt, 2008-2019"), width = 65), 
        subtitle = "Millones de pesos constantes, año base = 2019", 
        x = "",
        y = "Millones de pesos constantes\n",
        color = NULL,
-       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2011 a 2018 corresponde a presupuestos aprobados; los de\n2019 a presupuestos proyectados. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
+       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2008 a 2018 corresponde a presupuestos aprobados; los de\n2019 a presupuestos proyectados. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
   tema +
   theme(legend.direction = "vertical",
         legend.position = c(0.9, 0.9))
 
-ggsave(filename = "prespuesto_centros_conacyt_2011_2019_boxplot.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
+ggsave(filename = "prespuesto_centros_conacyt_2008_2019_boxplot.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
 
 ### Gráfica: líneas de evolución presupuesto Centros Conacyt, 2011-2019, CIDE resaltado ----
 cc %>% 
@@ -197,17 +206,17 @@ cc %>%
   scale_x_continuous(breaks = 2011:2019) +
   scale_y_continuous(labels = comma, breaks = seq(0, 700, 100)) +
   scale_color_manual(values = c("salmon", "steelblue")) +
-  labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt"), width = 65), 
+  labs(title = str_wrap(str_to_upper("presupuesto anual de 24 de los 26 centros conacyt, 2008-2019"), width = 65), 
        subtitle = "Millones de pesos constantes, año base = 2019", 
        x = "",
        y = "Millones de pesos constantes\n",
        color = NULL,
-       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2011 a 2018 corresponde a presupuestos aprobados; los de\n2019 a presupuestos proyectados. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
+       caption = "\nSebastián Garrido de Sierra / @segasi / Fuente: SHCP, url: https://bit.ly/2BzeG1Q. Los datos de 2008 a 2018 corresponde a presupuestos aprobados; los de\n2019 a presupuestos proyectados. La gráfica incluye datos de todos los Centros Conacyt excepto el COMIMS e Infotec.") +
   tema +
   theme(legend.direction = "vertical",
         legend.position = c(0.9, 0.9))
 
-ggsave(filename = "prespuesto_centros_conacyt_2011_2019_lineas_cide_resaltado.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
+ggsave(filename = "prespuesto_centros_conacyt_2008_2019_lineas_cide_resaltado.png", path = "03_graficas/", width = 15, height = 10, dpi = 200)
 
 
 ### Gráfica: columnas de cambio % del presupuesto de Centros Conacyt, 2015 vs. 2019 ----
